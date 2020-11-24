@@ -1,0 +1,43 @@
+{
+  "variables": {
+    "region1": "us-east-2"
+  },
+  "builders": [{
+    "name": "benchmarks",
+    "type": "amazon-ebs",
+    "region": "{{user `region1`}}",
+    "source_ami_filter": {
+      "filters": {
+        "virtualization-type": "hvm",
+        "name": "ubuntu/images/*ubuntu-bionic-18.04-amd64-server-*",
+        "root-device-type": "ebs"
+      },
+      "owners": ["099720109477"],
+      "most_recent": true
+    },
+    "instance_type": "m5d.large",
+    "ssh_username": "ubuntu",
+    "ami_name": "agent-benchmarks-image {{timestamp}}",
+    "ami_description": "AMI for agent benchmarks",
+    "ami_regions": ["{{user `region1`}}"]
+  }],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": "/usr/bin/cloud-init status --wait"
+    },
+    {
+      "type": "shell",
+      "script": "./packer/scripts/install_agent.sh"
+    },
+    {
+      "type": "file",
+      "source": "./packer/scripts/start_agent.sh",
+      "destination": "/home/ubuntu/"
+    },
+    {
+      "type": "shell",
+      "inline": "chmod +x *.sh"
+    }
+  ]
+}

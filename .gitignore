@@ -1,0 +1,12 @@
+.terraform
+
+# No backups in repository
+*.backup
+
+# For the purpose of this demo, no state should be checked in
+*.tfstate
+
+# Terraform lock file when running
+*.lock.info
+
+*.iml
