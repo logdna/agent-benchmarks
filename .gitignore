@@ -10,3 +10,5 @@
 *.lock.info
 
 *.iml
+
+/key.pem

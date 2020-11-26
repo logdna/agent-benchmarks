@@ -28,12 +28,7 @@
     },
     {
       "type": "shell",
-      "script": "./packer/scripts/install_agent.sh"
-    },
-    {
-      "type": "file",
-      "source": "./packer/scripts/start_agent.sh",
-      "destination": "/home/ubuntu/"
+      "script": "./packer/scripts/install_tools.sh"
     },
     {
       "type": "shell",

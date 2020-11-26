@@ -1,0 +1,21 @@
+#!/bin/bash
+
+sudo apt-get update -y -qq
+sudo apt install -y -qq build-essential pkg-config libssh-dev cmake libsystemd-dev
+
+# Install NVM
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.1/install.sh | bash
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+
+# Install Node.js
+nvm install 12
+node --version
+
+# Install rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source $HOME/.cargo/env
+rustc --version
+
+# Install cargo make
+cargo install --force cargo-make
