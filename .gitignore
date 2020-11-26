@@ -12,3 +12,4 @@
 *.iml
 
 /key.pem
+/env_vars.txt

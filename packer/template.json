@@ -29,10 +29,6 @@
     {
       "type": "shell",
       "script": "./packer/scripts/install_tools.sh"
-    },
-    {
-      "type": "shell",
-      "inline": "chmod +x *.sh"
     }
   ]
 }
