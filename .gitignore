@@ -13,3 +13,6 @@
 
 /key.pem
 /env_vars.txt
+
+# Any node modules folder
+node_modules/
