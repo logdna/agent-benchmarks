@@ -19,3 +19,8 @@ rustc --version
 
 # Install cargo make
 cargo install --force cargo-make
+
+# Download and build the rust agent at master branch to speed up future builds
+git clone https://github.com/logdna/logdna-agent-v2.git
+cd logdna-agent-v2 || exit 1
+cargo build --release
