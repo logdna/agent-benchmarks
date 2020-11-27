@@ -13,7 +13,7 @@ function launcher() {
   const p = execFile(pathToFile, []);
   console.log(`Process started from executable "${pathToFile}"`);
   const monitor = new ProcessMonitor(p.pid);
-  p.stderr.on('data', d => console.error('stderr', d))
+  p.stderr.on('data', d => console.error('stderr', d));
   p.on('error', e => {
     console.error('Rust agent returned error', e);
   })

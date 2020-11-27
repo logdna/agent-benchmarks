@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "fastify": "^3.8.0",
+    "fastify-compress": "^3.4.0",
     "hdr-histogram-js": "^2.0.1",
     "pidusage": "^2.0.21"
   }

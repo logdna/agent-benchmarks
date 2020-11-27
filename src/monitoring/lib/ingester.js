@@ -1,22 +1,36 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
 const fastifyStart = require('fastify');
 
-function startServer() {
-  const fastify = fastifyStart({
-    https: {
-      key: fs.readFileSync(path.join(process.env['HOME'], 'self-signed-server.key')),
-      cert: fs.readFileSync(path.join(process.env['HOME'], 'self-signed-server.cert'))
+const fastify = fastifyStart({});
+fastify.register(require('fastify-compress'));
+
+fastify.get('/', function (request, reply) {
+  reply.code(200).send('OK: ingester running');
+});
+
+fastify.post('/logs/agent', function (request, reply) {
+  const lines = request.body.ls;
+  let totalLength = 0;
+  const files = new Map();
+
+  for (const { line, f } of lines) {
+    let fileLength = files.get(f);
+    if (!fileLength) {
+      fileLength = 0
     }
-  });
+    fileLength += line.length;
+    files.set(f, fileLength)
+    totalLength += line.length;
+  }
 
-  fastify.get('/', function (request, reply) {
-    reply.code(200).send({ hello: 'world' });
-  });
+  console.log('-- post received with %d files: %d', files.size, totalLength);
 
-  fastify.listen(443);
-}
+  for (const [file, length] of files) {
+    console.log('---- %s: %d', file, length);
+  }
 
-module.exports = startServer;
+  reply.code(200).send({});
+});
+
+fastify.listen(443);
