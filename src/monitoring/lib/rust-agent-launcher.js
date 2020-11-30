@@ -2,7 +2,6 @@
 
 const { execFile } = require('child_process');
 const path = require('path');
-const ProcessMonitor = require('./process-monitor');
 
 function launcher() {
   return new Promise((resolve, reject) => {
@@ -13,18 +12,19 @@ function launcher() {
 
     const p = execFile(pathToFile, []);
     console.log(`Rust process started from executable "${pathToFile}"`);
-    const monitor = new ProcessMonitor(p.pid);
     p.stderr.on('data', d => console.error('stderr', d));
     p.on('error', e => {
       console.error('Rust agent returned error', e);
-      monitor.shutdown();
       reject(e);
     })
-    p.on('spawn', resolve);
+    p.on('spawn', () => resolve(p));
     p.on('exit', (code, signal) => {
-      console.log('Process exited', code, signal);
-      monitor.shutdown();
+      console.log('Rust agent process exited', code, signal);
     });
+
+    if (p.pid > 0) {
+      resolve(p);
+    }
   });
 }
 

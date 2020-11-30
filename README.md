@@ -4,8 +4,8 @@ Support scripts and terraform files to provision the instances and services on A
 
 ## Requirements
 
-- Packer v1.2 or above.
-- Terraform v0.12 or above.
+- [Packer] v1.2 or above.
+- [Terraform] v0.12 or above.
 - AWS Account.
 
 ## Initializing
@@ -58,3 +58,6 @@ terraform output private_key > key.pem
 chmod 600 key.pem 
 ssh ubuntu@$(terraform output client_r1_ip) -i key.pem
 ```
+
+[Packer]: https://www.packer.io/
+[Terraform]: https://www.terraform.io/

@@ -7,16 +7,19 @@ const stream = require('stream');
 const {once} = require('events');
 const finished = util.promisify(stream.finished);
 const maxChunkSize = 64_000;
-const fileLineLength = 10_000_000;
 const line = Buffer.from('Nov 30 09:14:47 sample-host-name sampleprocess[1204]: Hello from sample process\n');
 
-async function generateFileStructure(folderPath) {
+async function generateFileStructure(folderPath, fileLineLength) {
   await fs.promises.mkdir(folderPath, {recursive: true});
   console.log('Created folder %s', folderPath);
   const filePath = path.join(folderPath, 'system.log');
   await generateFile(filePath, fileLineLength);
   const fileStat = await fs.promises.stat(filePath);
-  console.log('Created file %s (file size: %d MiB)', filePath, Math.round(fileStat.size / 1024 / 1024));
+  console.log(
+    'Created file %s (lines: %d, file size: %d MiB)',
+    filePath,
+    fileLineLength,
+    Math.round(fileStat.size / 1024 / 1024));
 }
 
 async function generateFile(filePath, lineLength) {

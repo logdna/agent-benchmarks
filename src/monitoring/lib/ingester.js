@@ -2,39 +2,34 @@
 
 const fastifyStart = require('fastify');
 
-const fastify = fastifyStart({});
-fastify.register(require('fastify-compress'));
+function start() {
+  const expectedLines = parseInt(process.env['EXPECTED_LINES'], 10);
+  if (!expectedLines) {
+    throw new Error('EXPECTED_LINES environment variable must be set');
+  }
 
-fastify.get('/', function (request, reply) {
-  reply.code(200).send('OK: ingester running');
-});
+  let totalLines = 0;
 
-fastify.post('/logs/agent', function (request, reply) {
-  const lines = request.body.ls;
-  let totalLength = 0;
-  const files = new Map();
+  const fastify = fastifyStart({});
+  fastify.register(require('fastify-compress'));
 
-  for (const { line, f } of lines) {
-    let fileLength = files.get(f);
-    if (!fileLength) {
-      fileLength = 0
+  fastify.get('/', function (request, reply) {
+    reply.code(200).send('OK: ingester running');
+  });
+
+  fastify.post('/logs/agent', function (request, reply) {
+    const lines = request.body.ls;
+    totalLines += lines.length;
+    if (totalLines >= expectedLines) {
+      process.send({ finished: true });
     }
-    fileLength += line.length;
-    files.set(f, fileLength)
-    totalLength += line.length;
-  }
 
-  console.log('-- post received with %d files: %d', files.size, totalLength);
+    reply.code(200).send({});
+  });
 
-  for (const [file, length] of files) {
-    console.log('---- %s: %d', file, length);
-  }
+  fastify.listen(443);
 
-  console.log('--last line', lines[lines.length-1])
+  console.log('Ingester listening on 443');
+}
 
-  reply.code(200).send({});
-});
-
-fastify.listen(443);
-
-console.log('Ingester listening on 443');
+start();
