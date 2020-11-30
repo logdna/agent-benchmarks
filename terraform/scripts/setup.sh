@@ -7,6 +7,7 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 # Load environment variables that came from terraform variables
 export $(cat env_vars.txt)
 export LDLOGSSL=false
+export INGESTION_HOST=127.0.0.1
 echo "Agent branch is ${AGENT_BRANCH}"
 
 nvm ls

@@ -30,7 +30,11 @@ fastify.post('/logs/agent', function (request, reply) {
     console.log('---- %s: %d', file, length);
   }
 
+  console.log('--last line', lines[lines.length-1])
+
   reply.code(200).send({});
 });
 
 fastify.listen(443);
+
+console.log('Ingester listening on 443');

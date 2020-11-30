@@ -10,10 +10,13 @@ const interval = 1000;
 class ProcessMonitor extends EventEmitter {
   constructor(pid) {
     super();
-    this._pid = pid;
-    this._timer = setInterval(() => this._getUsage(), interval);
-    this._cpuTime = 0;
-    this._memoryHistogram = hdr.build();
+
+    if (typeof pid === 'number'){
+      this._pid = pid;
+      this._timer = setInterval(() => this._getUsage(), interval);
+      this._cpuTime = 0;
+      this._memoryHistogram = hdr.build();
+    }
   }
 
   async _getUsage() {
@@ -23,7 +26,7 @@ class ProcessMonitor extends EventEmitter {
       this._memoryHistogram.recordValue(stats.memory * bytesToMiB);
 
       console.log('--used cpu time', this._cpuTime);
-      console.log('--used memory', Math.round(stats.memory * bytesToMiB, 3));
+      console.log('--used memory %d MiB', Math.round(stats.memory * bytesToMiB, 3));
     } catch (e) {
       // We are executing in the background, we should
       // emit the error
