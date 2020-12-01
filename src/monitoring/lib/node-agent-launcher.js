@@ -5,7 +5,7 @@ const path = require('path');
 
 function launcher() {
   return new Promise((resolve, reject) => {
-    let pathToFile = process.env['PATH_TO_AGENT'];
+    let pathToFile = process.env['PATH_TO_NODE_AGENT'];
     if (!pathToFile) {
       pathToFile = path.join(process.env['HOME'], 'agent-linux', 'index.js')
     }

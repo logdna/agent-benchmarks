@@ -23,7 +23,7 @@ async function generateFileStructure(folderPath, fileLineLength) {
 }
 
 async function generateFile(filePath, lineLength) {
-  const fileStream = fs.createWriteStream(filePath, {encoding: 'utf8'});
+  const fileStream = fs.createWriteStream(filePath, {encoding: 'utf8', mode: 0o777});
   let chunk = createChunk();
   let lines = 0;
 

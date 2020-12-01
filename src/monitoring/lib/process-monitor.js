@@ -32,11 +32,11 @@ class ProcessMonitor extends EventEmitter {
   }
 
   async generateResults() {
-    if (process.env['SAVE_TO_S3'] !== 'true') {
+    // if (process.env['SAVE_TO_S3'] !== 'true') {
       console.log('TOTAL CPU TIME (in ms): %d', this._cpuTime);
       console.log('MEMORY HISTOGRAM (in MiB): %s', this._memoryHistogram);
       console.log('CPU HISTOGRAM (in percentage): %s', this._cpuHistogram);
-    }
+    // }
   }
 
   stop() {
