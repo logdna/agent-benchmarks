@@ -15,10 +15,11 @@ resource aws_instance client_r1 {
   }
 
   provisioner "local-exec" {
-    command = "echo AGENT_BRANCH=$AGENT_BRANCH AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY > env_vars.txt"
+    command = "echo AGENT_BRANCH=$AGENT_BRANCH AGENT_TYPE=$AGENT_TYPE AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY > env_vars.txt"
 
     environment = {
       AGENT_BRANCH = var.agent_branch
+      AGENT_TYPE = var.agent_type
       AWS_DEFAULT_REGION = var.region1
       AWS_ACCESS_KEY_ID = var.aws_access_key
       AWS_SECRET_ACCESS_KEY = var.aws_secret_key

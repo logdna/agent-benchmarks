@@ -10,11 +10,11 @@ function launcher(expectedLines) {
       const p = fork(pathToFile, [], { silent: true, env});
       ingesterContext.process = p;
       console.log(`Ingester process ${p.pid} started from "${pathToFile}"`);
-      p.stdout.on('data', d => console.log('stdout', d.toString()));
+      p.stdout.on('data', d => console.log('Ingester stdout', d.toString()));
       p.stderr.on('data', d => console.error('Ingester stderr', d.toString()));
       p.on('message', (m) => {
         if (m.finished) {
-          console.log('Finished receiving', m);
+          console.log('Finished receiving');
           receivedResolver(m);
         }
       });

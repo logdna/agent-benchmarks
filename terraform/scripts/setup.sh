@@ -32,6 +32,12 @@ else
       echo "Results will be saved to S3"
 fi
 
+if [ "$AGENT_TYPE" -ne "node" ]
+then
+  # Rust uses ingester on port 80 and node.js on 443
+  export INGESTER_PORT=80
+fi
+
 echo "Agent branch is ${AGENT_BRANCH}"
 
 nvm ls

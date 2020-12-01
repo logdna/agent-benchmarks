@@ -12,12 +12,18 @@ function launcher() {
 
     const p = execFile(pathToFile, []);
     console.log(`Rust process started from executable "${pathToFile}"`);
-    p.stderr.on('data', d => console.error('stderr', d));
+    p.stderr.on('data', d => {
+      const data = d.toString();
+      if (data.includes('initialized')) {
+        console.log('Rust agent started according to stdout/stderr');
+        resolve(p);
+      }
+      console.error('stderr', data);
+    });
     p.on('error', e => {
       console.error('Rust agent returned error', e);
       reject(e);
     })
-    p.on('spawn', () => resolve(p));
     p.on('exit', (code, signal) => {
       console.log('Rust agent process exited', code, signal);
     });

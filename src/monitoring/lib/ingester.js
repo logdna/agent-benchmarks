@@ -1,13 +1,18 @@
 'use strict';
 
 const fastifyStart = require('fastify');
+const port = parseInt(process.env['INGESTER_PORT']) || 443;
+const listenAddress = '127.0.0.1';
 
-function start() {
+async function start() {
   const expectedLines = parseInt(process.env['EXPECTED_LINES'], 10);
   if (!expectedLines) {
     throw new Error('EXPECTED_LINES environment variable must be set');
   }
+  console.log(`Ingester expecting ${expectedLines} lines`);
 
+  let receivedFirstRequest = false;
+  let hasFinished = false;
   let totalLines = 0;
 
   const fastify = fastifyStart({});
@@ -18,18 +23,30 @@ function start() {
   });
 
   fastify.post('/logs/agent', function (request, reply) {
-    const lines = request.body.ls;
-    totalLines += lines.length;
-    if (totalLines >= expectedLines) {
-      process.send({ finished: true });
+    if (!receivedFirstRequest) {
+      receivedFirstRequest = true;
+      console.log('Ingester received first request');
     }
 
-    reply.code(200).send({});
+    const lines = request.body.ls || request.body.lines;
+    totalLines += lines.length;
+    if (totalLines >= expectedLines) {
+      if (!hasFinished) {
+        hasFinished = true;
+        process.send({ finished: true });
+      }
+    }
+
+    reply.code(200).send('OK');
   });
 
-  fastify.listen(443);
+  await fastify.listen(port, listenAddress);
 
-  console.log('Ingester listening on 443');
+  console.log(`Ingester listening on http://${listenAddress}:${port}`);
 }
 
-start();
+start()
+  .catch(e => {
+    console.error('There was an error while starting the ingester', e);
+    process.exit(1);
+  });

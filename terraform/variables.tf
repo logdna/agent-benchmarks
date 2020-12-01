@@ -27,3 +27,8 @@ variable "agent_branch" {
   default = "master"
   type = string
 }
+
+variable "agent_type" {
+  default = "rust"
+  type = string
+}

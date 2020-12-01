@@ -8,6 +8,7 @@ const {once} = require('events');
 const finished = util.promisify(stream.finished);
 const maxChunkSize = 64_000;
 const line = Buffer.from('Nov 30 09:14:47 sample-host-name sampleprocess[1204]: Hello from sample process\n');
+const fileOptions = {encoding: 'utf8', mode: 0o777};
 
 async function generateFileStructure(folderPath, fileLineLength) {
   await fs.promises.mkdir(folderPath, {recursive: true});
@@ -22,8 +23,13 @@ async function generateFileStructure(folderPath, fileLineLength) {
     Math.round(fileStat.size / 1024 / 1024));
 }
 
+async function appendOneLine(folderPath) {
+  const filePath = path.join(folderPath, 'system.log');
+  await fs.promises.appendFile(filePath, line, fileOptions)
+}
+
 async function generateFile(filePath, lineLength) {
-  const fileStream = fs.createWriteStream(filePath, {encoding: 'utf8', mode: 0o777});
+  const fileStream = fs.createWriteStream(filePath, fileOptions);
   let chunk = createChunk();
   let lines = 0;
 
@@ -58,4 +64,4 @@ function createChunk(lines = Number.MAX_SAFE_INTEGER) {
   return {buffer: Buffer.concat(buffers, byteLength), lineLength};
 }
 
-module.exports = generateFileStructure;
+module.exports = {generateFileStructure, appendOneLine};
