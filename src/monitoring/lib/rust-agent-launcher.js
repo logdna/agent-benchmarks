@@ -27,10 +27,6 @@ function launcher() {
     p.on('exit', (code, signal) => {
       console.log('Rust agent process exited', code, signal);
     });
-
-    if (p.pid > 0) {
-      resolve(p);
-    }
   });
 }
 

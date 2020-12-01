@@ -14,13 +14,15 @@ const fileLineLength = parseInt(process.env['LOG_LINES']) || 10_000_000;
 
 async function run() {
   await generateFileStructure(folderPath, fileLineLength)
+
   const ingesterContext = await ingesterLauncher(fileLineLength);
 
-  const agentLaunchPromise = process.env['AGENT_TYPE'] !== 'node' ? rustLauncher() : nodeLauncher();
+  const isRust = process.env['AGENT_TYPE'] !== 'node';
+  const agentLaunchPromise = isRust ? rustLauncher() : nodeLauncher();
 
   await Promise.race([
     agentLaunchPromise,
-    delay(2000).then(() => { throw new Error('Process could not start before timeout'); })
+    delay(10000).then(() => { throw new Error('Process could not start before timeout'); })
   ]);
 
   const agentProcess = await agentLaunchPromise;
@@ -29,13 +31,19 @@ async function run() {
   console.log('Launch completed');
 
   // Rust requires the file to be changed to kick in
-  await appendOneLine(folderPath);
+  const backgroundTimer = isRust ? appendInTheBackground() : null;
 
   // Wait for the ingester to receive all the data
   await ingesterContext.finishReceiving;
 
-  console.log('Generating results...')
+  console.log('Waiting a few seconds after finished receiving...');
+  await delay(5000);
+
   monitor.stop();
+  clearInterval(backgroundTimer);
+
+  console.log('Generating results...');
+
   await monitor.generateResults();
 
   console.log('Shutting down...');
@@ -47,10 +55,17 @@ async function run() {
   ingesterContext.process.kill();
 }
 
+
 run()
   .catch(e => {
     console.error('There was an error while launching', e);
     process.exit(1);
   });
 
-
+function appendInTheBackground() {
+  return setInterval(() => {
+    console.log('--appending a line');
+    appendOneLine(folderPath)
+      .catch(e => console.log('Error while appending in the background', e));
+  }, 500);
+}

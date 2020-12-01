@@ -25,9 +25,12 @@ class ProcessMonitor extends EventEmitter {
       this._memoryHistogram.recordValue(stats.memory * bytesToMiB);
       this._cpuHistogram.recordValue(stats.cpu);
     } catch (e) {
-      // We are executing in the background, we should
-      // emit the error
-      this.emit('error', e);
+      // We are executing in the background
+      console.error('There was an error while recording stats', e);
+      if (e.code === 'ESRCH') {
+        console.log('Process is no longer available, preventing further lookups');
+        clearInterval(this._timer);
+      }
     }
   }
 
@@ -45,5 +48,3 @@ class ProcessMonitor extends EventEmitter {
 }
 
 module.exports = ProcessMonitor;
-
-

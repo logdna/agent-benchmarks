@@ -6,7 +6,6 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 
 # Load environment variables that came from terraform variables
 export $(cat env_vars.txt)
-export SAVE_TO_S3=true
 export LDLOGSSL=false
 export INGESTION_HOST=127.0.0.1
 export LOGDNA_HOST=$INGESTION_HOST
@@ -16,6 +15,7 @@ export LOGDNA_AGENT_KEY=123
 export LOGDNA_INGESTION_KEY=$LOGDNA_AGENT_KEY
 export LOGDNA_EXCLUSION_RULES="/var/log/**"
 export LOGDNA_LOOKBACK=start
+export LOG_LINES=200000
 
 if [ -z "$AWS_ACCESS_KEY_ID" ]
 then
