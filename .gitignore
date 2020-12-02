@@ -11,6 +11,8 @@
 
 *.iml
 
+*.csv
+
 /key.pem
 /env_vars.txt
 

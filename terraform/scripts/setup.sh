@@ -16,6 +16,7 @@ export LOGDNA_INGESTION_KEY=$LOGDNA_AGENT_KEY
 export LOGDNA_EXCLUSION_RULES="/var/log/**"
 export LOGDNA_LOOKBACK=start
 export LOG_LINES=200000
+export RUN_TIME_IN_SECONDS=60
 
 if [ -z "$AWS_ACCESS_KEY_ID" ]
 then
@@ -66,4 +67,4 @@ cd ..
 git clone -q git@github.com:logdna/agent-benchmarks.git
 cd agent-benchmarks/src/monitoring || exit 1
 npm install
-sudo -E ${NVM_BIN}/node index.js
+sudo -E ${NVM_BIN}/node --unhandled-rejections=strict index.js

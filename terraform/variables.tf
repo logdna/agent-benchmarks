@@ -32,3 +32,9 @@ variable "agent_type" {
   default = "rust"
   type = string
 }
+
+variable "test_scenario" {
+  description = "Test scenario 1 for lookback or Test scenario 2 for append"
+  default = 1
+  type = number
+}

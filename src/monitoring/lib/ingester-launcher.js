@@ -24,7 +24,7 @@ function launcher(expectedLines) {
         reject(e);
       })
       p.on('exit', (code, signal) => {
-        console.log('Process exited', code, signal);
+        console.log('Ingester process exited', code, signal);
       });
 
       if (p.pid > 0) {
