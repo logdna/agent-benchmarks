@@ -9,14 +9,14 @@ export $(cat env_vars.txt)
 export LDLOGSSL=false
 export INGESTION_HOST=127.0.0.1
 export LOGDNA_HOST=$INGESTION_HOST
-export DEFAULT_LOG_PATH=/tmp/test-logs/
+export DEFAULT_LOG_PATH=/run/user/$UID/test-logs
 export LOGDNA_LOG_DIRS=$DEFAULT_LOG_PATH
 export LOGDNA_AGENT_KEY=123
 export LOGDNA_INGESTION_KEY=$LOGDNA_AGENT_KEY
 export LOGDNA_EXCLUSION_RULES="/var/log/**"
 export LOGDNA_LOOKBACK=start
 export LOG_LINES=200000
-export RUN_TIME_IN_SECONDS=60
+export RUN_TIME_IN_SECONDS=120
 
 if [ -z "$AWS_ACCESS_KEY_ID" ]
 then
@@ -33,7 +33,7 @@ else
       echo "Results will be saved to S3"
 fi
 
-if [ "$AGENT_TYPE" -ne "node" ]
+if [ "$AGENT_TYPE" != "node" ]
 then
   # Rust uses ingester on port 80 and node.js on 443
   export INGESTER_PORT=80

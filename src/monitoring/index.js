@@ -9,7 +9,7 @@ const {generateFileStructure, appendOneLine, appendPeriodically} = require('./li
 const ProcessMonitor = require('./lib/process-monitor');
 const delay = util.promisify(setTimeout);
 
-const folderPath = '/tmp/test-logs/';
+const folderPath = process.env['DEFAULT_LOG_PATH'];
 const fileLineLength = parseInt(process.env['LOG_LINES']) || 10_000_000;
 const testScenario = parseInt(process.env['TEST_SCENARIO']) || 1;
 const isRust = process.env['AGENT_TYPE'] !== 'node';
@@ -29,6 +29,10 @@ const scenarios = {
 };
 
 async function run() {
+  if (!folderPath) {
+    throw new Error('DEFAULT_LOG_PATH must be set');
+  }
+
   if (testScenario === scenarios.lookback) {
     await runScenarioLookback();
   } else {
