@@ -39,6 +39,16 @@ aws-vault exec <profile_name> -- packer build ./packer/template.json
 aws-vault exec <profile_name> -- terraform apply ./terraform/
 ```
 
+## Setting up variables
+
+The terraform files include several [variables][tf-variables] that can be set, the most common being
+`agent_type`, `agent_branch` and `test_scenario`, there are [several ways you can set the value][tf-variables]
+of those variables. For example:
+
+```bash
+aws-okta exec <profile_name> -- terraform apply -var="agent_type=node" -var="test_scenario=2" ./terraform/ 
+```
+
 ## Cleanup
 
 You can cleanup all terraform managed resources with:
@@ -61,3 +71,4 @@ ssh ubuntu@$(terraform output client_r1_ip) -i key.pem
 
 [Packer]: https://www.packer.io/
 [Terraform]: https://www.terraform.io/
+[tf-variables]: https://www.terraform.io/docs/configuration/variables.html
