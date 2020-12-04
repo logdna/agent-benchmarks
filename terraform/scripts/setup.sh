@@ -9,7 +9,7 @@ export $(cat env_vars.txt)
 export LDLOGSSL=false
 export INGESTION_HOST=127.0.0.1
 export LOGDNA_HOST=$INGESTION_HOST
-export DEFAULT_LOG_PATH=/run/user/$UID/test-logs
+export DEFAULT_LOG_PATH=/data/test-logs
 export LOGDNA_LOG_DIRS=$DEFAULT_LOG_PATH
 export LOGDNA_AGENT_KEY=123
 export LOGDNA_INGESTION_KEY=$LOGDNA_AGENT_KEY
