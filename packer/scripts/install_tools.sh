@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Mount EBS volume on /data
+sudo mkdir /data
+sudo mount /dev/nvme1n1 /data
+
 sudo apt-get update -y -qq
 sudo apt install -y -qq build-essential pkg-config libssh-dev cmake libsystemd-dev
 
@@ -24,8 +28,3 @@ cargo install --force cargo-make
 git clone https://github.com/logdna/logdna-agent-v2.git
 cd logdna-agent-v2 || exit 1
 cargo build --release
-
-# Mount EBS volume on /data
-sudo mkfs -t xfs /dev/nvme1n1
-sudo mkdir /data
-sudo mount /dev/nvme1n1 /data
