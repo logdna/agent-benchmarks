@@ -6,8 +6,8 @@ const hdr = require('hdr-histogram-js');
 
 const bytesToMiB = 1 / (1024 * 1024);
 const interval = 200;
-// interval * resolution = resolutionForTimeSeries
-const resolution = 5;
+// interval * resolutionForTimeSeries = resolutionInMs
+const resolution = parseInt(process.env['RESOLUTION_TIME_SERIES']) || 5;
 
 class ProcessMonitor extends EventEmitter {
   constructor(p) {
@@ -46,17 +46,15 @@ class ProcessMonitor extends EventEmitter {
   }
 
   async generateResults() {
-    // if (process.env['SAVE_TO_S3'] !== 'true') {
-      console.log('TOTAL CPU TIME (in ms): %d', this._cpuTime);
-      console.log('MEMORY HISTOGRAM (in MiB): %s', this._memoryHistogram);
-      console.log('CPU HISTOGRAM (in percentage): %s', this._cpuHistogram);
+    console.log('TOTAL CPU TIME (in ms): %d', this._cpuTime);
+    console.log('MEMORY HISTOGRAM (in MiB): %s', this._memoryHistogram);
+    console.log('CPU HISTOGRAM (in percentage):%s', this._cpuHistogram);
 
-      console.log('------------------');
-      console.log('time_index,value');
-      for (let i = 0; i < this._memoryTimeSeries.length; i++) {
-        console.log(`${i},${this._memoryTimeSeries[i]}`);
-      }
-    // }
+    console.log('------------------');
+    console.log(`time_index,value_${process.env['AGENT_TYPE']}`);
+    for (let i = 0; i < this._memoryTimeSeries.length; i++) {
+      console.log(`${i},${this._memoryTimeSeries[i]}`);
+    }
   }
 
   stop() {

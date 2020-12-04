@@ -20,10 +20,13 @@ export LOGDNA_AGENT_KEY=123
 export LOGDNA_INGESTION_KEY=$LOGDNA_AGENT_KEY
 export LOGDNA_EXCLUSION_RULES="/var/log/**"
 export LOGDNA_LOOKBACK=start
+export RESOLUTION_TIME_SERIES=10
 
 # TODO: Move this settings to a "profile" or a group of settings
 export LOG_LINES=200000
 export RUN_TIME_IN_SECONDS=120
+export MAX_CHUNK_SIZE_KB=64
+export TOTAL_FILES=1
 export RUN_IN_THE_BACKGROUND=false
 
 if [ -z "$AWS_ACCESS_KEY_ID" ]

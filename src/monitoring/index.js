@@ -14,6 +14,7 @@ const fileLineLength = parseInt(process.env['LOG_LINES']) || 10_000_000;
 const testScenario = parseInt(process.env['TEST_SCENARIO']) || 1;
 const isRust = process.env['AGENT_TYPE'] !== 'node';
 const runTimeInSeconds = parseInt(process.env['RUN_TIME_IN_SECONDS']) || 30;
+const totalFiles = parseInt(process.env['TOTAL_FILES']) || 1;
 
 const scenarios = {
   /**
@@ -41,7 +42,7 @@ async function run() {
 }
 
 async function runScenarioLookback() {
-  await generateFileStructure(folderPath, fileLineLength)
+  await generateFileStructure(folderPath, 1, fileLineLength)
 
   const ingesterContext = await ingesterLauncher(fileLineLength);
 
@@ -63,12 +64,12 @@ async function runScenarioLookback() {
 }
 
 async function runScenarioAppend() {
-  await generateFileStructure(folderPath, 0)
+  await generateFileStructure(folderPath, totalFiles, 0)
   const ingesterContext = await ingesterLauncher(0);
   const monitor = await startAgent();
 
   console.log('Starting to append to file periodically');
-  const appendContext = appendPeriodically(folderPath);
+  const appendContext = appendPeriodically(folderPath, totalFiles);
   await delay(runTimeInSeconds * 1000);
 
   console.log('Stopping...');

@@ -8,49 +8,59 @@ const {once} = require('events');
 const finished = util.promisify(stream.finished);
 const delay = util.promisify(setTimeout);
 
-const maxChunkSize = 64_000;
+const maxChunkSize = parseInt(process.env['MAX_CHUNK_SIZE_KB']) * 1000 || 64_000;
 const line = Buffer.from('Nov 30 09:14:47 sample-host-name sampleprocess[1204]: Hello from sample process\n');
 const fileOptions = {encoding: 'utf8', mode: 0o777};
 const delayAppendMs = parseInt(process.env['DELAY_APPEND_MS']);
 
-async function generateFileStructure(folderPath, fileLineLength) {
+async function generateFileStructure(folderPath, totalFiles, fileLineLength) {
   await fs.promises.mkdir(folderPath, {recursive: true});
   console.log('Created folder %s', folderPath);
-  const filePath = path.join(folderPath, 'system.log');
-  await generateFile(filePath, fileLineLength);
-  const fileStat = await fs.promises.stat(filePath);
-  console.log(
-    'Created file %s (lines: %d, file size: %d MiB)',
-    filePath,
-    fileLineLength,
-    Math.round(fileStat.size / 1024 / 1024));
+  for (let i = 0; i < totalFiles; i++) {
+    const filePath = getFilePath(folderPath, i);
+    await generateFile(filePath, fileLineLength);
+    const fileStat = await fs.promises.stat(filePath);
+    console.log(
+      'Created file %s (lines: %d, file size: %d MiB)',
+      filePath,
+      fileLineLength,
+      Math.round(fileStat.size / 1024 / 1024));
+  }
+}
+
+function getFilePath(folderPath, index = 0) {
+  return path.join(folderPath, `sample${index}.log`);
 }
 
 async function appendOneLine(folderPath) {
-  const filePath = path.join(folderPath, 'system.log');
-  await fs.promises.appendFile(filePath, line, fileOptions)
+  await fs.promises.appendFile(getFilePath(folderPath), line, fileOptions)
 }
 
-function appendPeriodically(folderPath) {
-  const context = { hasStopped: false, folderPath };
+function appendPeriodically(folderPath, totalFiles) {
+  const options = {
+    hasStopped: false,
+    folderPath,
+    totalFiles
+  };
 
   // Start appending in the background
-  const promise = startAppendChunks(context);
+  const promise = startAppendChunks(options);
 
   return {
     stop: () => {
-      context.hasStopped = true;
+      options.hasStopped = true;
       // await for appending to end
       return promise;
     }
   };
 }
 
-async function startAppendChunks(context) {
-  const filePath = path.join(context.folderPath, 'system.log');
+async function startAppendChunks(options) {
   const chunk = createChunk();
   const delayMs = !isNaN(delayAppendMs) ? delayAppendMs : 20;
-  while (!context.hasStopped) {
+  let fileIndex = 0;
+  while (!options.hasStopped) {
+    const filePath = getFilePath(options.folderPath, fileIndex++ % options.totalFiles);
     await fs.promises.appendFile(filePath, chunk.buffer, fileOptions);
     await delay(delayMs);
   }
