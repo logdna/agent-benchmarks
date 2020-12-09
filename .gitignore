@@ -13,8 +13,12 @@
 
 *.csv
 
-/key.pem
-/env_vars.txt
+*.pem
+env_vars.txt
+nohup.out
 
 # Any node modules folder
 node_modules/
+
+# Folder results
+results/

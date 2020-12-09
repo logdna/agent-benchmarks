@@ -3,7 +3,7 @@
 const fastifyStart = require('fastify');
 const port = parseInt(process.env['INGESTER_PORT']) || 443;
 const listenAddress = '127.0.0.1';
-const logProcessedLines = process.env['INGESTER_LOG_PROCESSED'] === 'true';
+const logProcessed = process.env['LOG_PROCESSED'] === 'true';
 
 async function start() {
   const expectedLines = parseInt(process.env['EXPECTED_LINES'], 10);
@@ -21,10 +21,10 @@ async function start() {
   let hasFinished = false;
   let totalLines = 0;
 
-  if (logProcessedLines) {
+  if (logProcessed) {
     setInterval(() => {
       console.log(`Ingester processed ${totalLines} lines`);
-    }, 1000);
+    }, 10000);
   }
 
   const fastify = fastifyStart({});

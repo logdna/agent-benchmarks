@@ -72,7 +72,7 @@ async function runScenarioAppend() {
   const appendContext = appendPeriodically(folderPath, totalFiles);
   await delay(runTimeInSeconds * 1000);
 
-  console.log('Stopping...');
+  console.log(`Stopping after ${runTimeInSeconds} seconds...`);
   await appendContext.stop();
 
   // Adding an extra delay to see how it catches up and allowing GC
@@ -91,7 +91,9 @@ async function startAgent() {
   ]);
 
   const agentProcess = await agentLaunchPromise;
-  const monitor = new ProcessMonitor(agentProcess);
+  // TODO: Use names 'baseline' and 'compare'
+  const monitor = new ProcessMonitor(agentProcess, 'baseline');
+  await monitor.init();
 
   console.log('Launch completed');
   return monitor;
