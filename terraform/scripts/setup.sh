@@ -26,6 +26,7 @@ export RESOLUTION_TIME_SERIES=10
 export LOG_LINES=200000
 export RUN_TIME_IN_SECONDS=120
 export MAX_CHUNK_SIZE_KB=64
+export DELAY_APPEND_MS=5
 export TOTAL_FILES=1
 export RUN_IN_THE_BACKGROUND=false
 
@@ -79,6 +80,7 @@ git clone -q git@github.com:logdna/agent-benchmarks.git
 cd agent-benchmarks/src/monitoring || exit 1
 npm install
 
+# Start the benchmark
 NODE_OPTIONS="--unhandled-rejections=strict"
 
 if [ "$RUN_IN_THE_BACKGROUND" == "true" ]

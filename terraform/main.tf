@@ -82,6 +82,6 @@ resource tls_private_key dev {
 }
 
 resource aws_key_pair key_r1 {
-  key_name   = "dev_key_r1"
+  key_name   = "dev_key_r1_${formatdate("YYYYMMDDhhmmss", timestamp())}"
   public_key = tls_private_key.dev.public_key_openssh
 }
