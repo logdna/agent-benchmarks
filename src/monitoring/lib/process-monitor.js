@@ -2,7 +2,7 @@
 
 const EventEmitter = require('events');
 const path = require('path');
-const fs = require('fs/promises');
+const fs = require('fs').promises;
 const pidusage = require('pidusage');
 const hdr = require('hdr-histogram-js');
 

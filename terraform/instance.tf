@@ -41,6 +41,10 @@ resource aws_instance client_r1 {
     destination = "env_vars.txt"
   }
 
+  provisioner "local-exec" {
+    command = "rm env_vars.txt"
+  }
+
   provisioner "file" {
     connection {
       type = "ssh"
