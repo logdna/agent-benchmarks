@@ -14,6 +14,7 @@ const fileOptions = {encoding: 'utf8', mode: 0o777};
 const delayAppendMs = parseInt(process.env['DELAY_APPEND_MS']);
 
 async function generateFileStructure(folderPath, totalFiles, fileLineLength) {
+  await fs.promises.rmdir(folderPath, {recursive: true});
   await fs.promises.mkdir(folderPath, {recursive: true});
   console.log('Created folder %s', folderPath);
   for (let i = 0; i < totalFiles; i++) {
