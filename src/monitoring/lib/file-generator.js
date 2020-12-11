@@ -8,23 +8,22 @@ const {once} = require('events');
 const finished = util.promisify(stream.finished);
 const delay = util.promisify(setTimeout);
 
-const maxChunkSize = parseInt(process.env['MAX_CHUNK_SIZE_KB']) * 1000 || 64_000;
 const line = Buffer.from('Nov 30 09:14:47 sample-host-name sampleprocess[1204]: Hello from sample process\n');
 const fileOptions = {encoding: 'utf8', mode: 0o777};
-const delayAppendMs = parseInt(process.env['DELAY_APPEND_MS']);
 
-async function generateFileStructure(folderPath, totalFiles, fileLineLength) {
+async function generateFileStructure(settings, initialFileLineLength) {
+  const {folderPath,totalFiles} = settings;
   await fs.promises.rmdir(folderPath, {recursive: true});
   await fs.promises.mkdir(folderPath, {recursive: true});
   console.log('Created folder %s', folderPath);
   for (let i = 0; i < totalFiles; i++) {
     const filePath = getFilePath(folderPath, i);
-    await generateFile(filePath, fileLineLength);
+    await generateFile(filePath, settings, initialFileLineLength);
     const fileStat = await fs.promises.stat(filePath);
     console.log(
       'Created file %s (lines: %d, file size: %d MiB)',
       filePath,
-      fileLineLength,
+      initialFileLineLength,
       Math.round(fileStat.size / 1024 / 1024));
   }
 }
@@ -37,46 +36,43 @@ async function appendOneLine(folderPath) {
   await fs.promises.appendFile(getFilePath(folderPath), line, fileOptions)
 }
 
-function appendPeriodically(folderPath, totalFiles) {
-  const options = {
-    hasStopped: false,
-    folderPath,
-    totalFiles
+function appendPeriodically(settings) {
+  const stopContext = {
+    hasStopped: false
   };
 
   // Start appending in the background
-  const promise = startAppendChunks(options);
+  const promise = startAppendChunks(stopContext, settings);
 
   return {
     stop: () => {
-      options.hasStopped = true;
+      stopContext.hasStopped = true;
       // await for appending to end
       return promise;
     }
   };
 }
 
-async function startAppendChunks(options) {
-  const chunk = createChunk();
-  const delayMs = !isNaN(delayAppendMs) ? delayAppendMs : 20;
+async function startAppendChunks(options, settings) {
+  const chunk = createChunk(settings.maxChunkSize);
   let fileIndex = 0;
   while (!options.hasStopped) {
-    const filePath = getFilePath(options.folderPath, fileIndex++ % options.totalFiles);
+    const filePath = getFilePath(settings.folderPath, fileIndex++ % settings.totalFiles);
     await fs.promises.appendFile(filePath, chunk.buffer, fileOptions);
-    await delay(delayMs);
+    await delay(settings.delayAppendMs);
   }
 }
 
-async function generateFile(filePath, lineLength) {
+async function generateFile(filePath, settings, lineLength) {
   const fileStream = fs.createWriteStream(filePath, fileOptions);
-  let chunk = createChunk();
+  let chunk = createChunk(settings.maxChunkSize);
   let lines = 0;
 
   while (lines < lineLength) {
     const remaining = lineLength - lines;
     if (remaining < chunk.lineLength) {
       // Use a smaller chunk
-      chunk = createChunk(remaining);
+      chunk = createChunk(settings.maxChunkSize, remaining);
     }
 
     if (!fileStream.write(chunk.buffer)) {
@@ -91,7 +87,7 @@ async function generateFile(filePath, lineLength) {
   await finished(fileStream);
 }
 
-function createChunk(lines = Number.MAX_SAFE_INTEGER) {
+function createChunk(maxChunkSize, lines = Number.MAX_SAFE_INTEGER) {
   let lineLength = 0
   let byteLength = 0;
   const buffers = [];

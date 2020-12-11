@@ -3,13 +3,10 @@
 const { execFile } = require('child_process');
 const path = require('path');
 
-function launcher() {
+function launcher(name) {
   return new Promise((resolve, reject) => {
-    let pathToFile = process.env['PATH_TO_RUST_AGENT'];
-    if (!pathToFile) {
-      pathToFile = path.join(process.env['HOME'], 'logdna-agent-v2/target/release/logdna-agent')
-    }
-
+    const basePath = process.env['PATH_TO_RUST_AGENT'] || path.join(process.env['HOME'], name)
+    const pathToFile = path.join(basePath, 'target', 'release', 'logdna-agent');
     const p = execFile(pathToFile, []);
     console.log(`Rust process started from executable "${pathToFile}"`);
     p.stderr.on('data', d => {

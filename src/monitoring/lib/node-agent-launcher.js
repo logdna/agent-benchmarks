@@ -3,13 +3,10 @@
 const { fork } = require('child_process');
 const path = require('path');
 
-function launcher() {
+function launcher(name) {
   return new Promise((resolve, reject) => {
-    let pathToFile = process.env['PATH_TO_NODE_AGENT'];
-    if (!pathToFile) {
-      pathToFile = path.join(process.env['HOME'], 'agent-linux', 'index.js')
-    }
-
+    const basePath = process.env['PATH_TO_NODE_AGENT'] || path.join(process.env['HOME'], name);
+    const pathToFile = path.join(basePath, 'index.js');
     const p = fork(pathToFile, ['-R'], { silent: true, execArgv: []});
     console.log(`Process ${p.pid} started from node module "${pathToFile}"`);
     p.stderr.on('data', d => {

@@ -7,49 +7,34 @@ const nodeLauncher = require('./lib/node-agent-launcher');
 const ingesterLauncher = require('./lib/ingester-launcher');
 const {generateFileStructure, appendOneLine, appendPeriodically} = require('./lib/file-generator');
 const ProcessMonitor = require('./lib/process-monitor');
+const {scenarios, agentTypes, getSettings} = require('./lib/common');
+
 const delay = util.promisify(setTimeout);
-
-const folderPath = process.env['DEFAULT_LOG_PATH'];
-const fileLineLength = parseInt(process.env['LOG_LINES']) || 10_000_000;
-const testScenario = parseInt(process.env['TEST_SCENARIO']) || 1;
-const isRust = process.env['AGENT_TYPE'] !== 'node';
-const runTimeInSeconds = parseInt(process.env['RUN_TIME_IN_SECONDS']) || 30;
-const totalFiles = parseInt(process.env['TOTAL_FILES']) || 1;
-
-const scenarios = {
-  /**
-   * Test scenario that uses a single pre-generated large file and waits for all the data
-   * to reach the ingester.
-   */
-  lookback: 1,
-
-  /**
-   * Test scenario that uses a single file and appends the data while the agent is reading from it.
-   */
-  readWhileAppending: 2
-};
+const settings = getSettings();
 
 async function run() {
-  if (!folderPath) {
+  if (!settings.folderPath) {
     throw new Error('DEFAULT_LOG_PATH must be set');
   }
 
-  if (testScenario === scenarios.lookback) {
-    await runScenarioLookback();
+  let scenarioRunner;
+  if (settings.testScenario === scenarios.lookback) {
+    scenarioRunner = runScenarioLookback;
   } else {
-    await runScenarioAppend();
+    scenarioRunner = runScenarioAppend;
   }
+
+  await scenarioRunner('baseline', settings.baselineAgent);
+  await scenarioRunner('compare', settings.compareAgent);
 }
 
-async function runScenarioLookback() {
-  await generateFileStructure(folderPath, 1, fileLineLength)
-
-  const ingesterContext = await ingesterLauncher(fileLineLength);
-
-  const monitor = await startAgent();
+async function runScenarioLookback(name, agentType) {
+  await generateFileStructure(settings, settings.fileLineLength);
+  const ingesterContext = await ingesterLauncher(settings.fileLineLength);
+  const monitor = await startAgent(name, agentType);
 
   // Rust requires the file to be changed to kick in
-  const backgroundTimer = isRust ? appendInTheBackground() : null;
+  const backgroundTimer = agentType === agentTypes.rust ? appendInTheBackground() : null;
 
   // Wait for the ingester to receive all the data
   await ingesterContext.finishReceiving;
@@ -63,16 +48,16 @@ async function runScenarioLookback() {
   await shutdown(monitor, ingesterContext);
 }
 
-async function runScenarioAppend() {
-  await generateFileStructure(folderPath, totalFiles, 0)
+async function runScenarioAppend(name, agentType) {
+  await generateFileStructure(settings, 0)
   const ingesterContext = await ingesterLauncher(0);
-  const monitor = await startAgent();
+  const monitor = await startAgent(name, agentType);
 
   console.log('Starting to append to file periodically');
-  const appendContext = appendPeriodically(folderPath, totalFiles);
-  await delay(runTimeInSeconds * 1000);
+  const appendContext = appendPeriodically(settings);
+  await delay(settings.runTimeInSeconds * 1000);
 
-  console.log(`Stopping after ${runTimeInSeconds} seconds...`);
+  console.log(`Stopping after ${settings.runTimeInSeconds} seconds...`);
   await appendContext.stop();
 
   // Adding an extra delay to see how it catches up and allowing GC
@@ -82,17 +67,16 @@ async function runScenarioAppend() {
   await shutdown(monitor, ingesterContext);
 }
 
-async function startAgent() {
-  const agentLaunchPromise = isRust ? rustLauncher() : nodeLauncher();
+async function startAgent(name, agentType) {
+  const launcher = agentType === agentTypes.rust ? rustLauncher : nodeLauncher;
 
   await Promise.race([
-    agentLaunchPromise,
+    launcher(name),
     delay(10000).then(() => { throw new Error('Process could not start before timeout'); })
   ]);
 
   const agentProcess = await agentLaunchPromise;
-  // TODO: Use names 'baseline' and 'compare'
-  const monitor = new ProcessMonitor(agentProcess, 'baseline');
+  const monitor = new ProcessMonitor(agentProcess, name);
   await monitor.init();
 
   console.log('Launch completed');
@@ -121,7 +105,7 @@ run()
 
 function appendInTheBackground() {
   return setInterval(() => {
-    appendOneLine(folderPath)
+    appendOneLine(settings.folderPath)
       .catch(e => console.log('Error while appending in the background', e));
   }, 500);
 }
