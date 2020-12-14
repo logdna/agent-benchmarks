@@ -42,11 +42,11 @@ aws-vault exec <profile_name> -- terraform apply ./terraform/
 ## Setting up variables
 
 The terraform files include several [variables][tf-variables] that can be set, the most common being
-`agent_type`, `agent_branch` and `test_scenario`, there are [several ways you can set the value][tf-variables]
+`agent_type`, `baseline_agent_branch` and `test_scenario`, there are [several ways you can set the value][tf-variables]
 of those variables. For example:
 
 ```bash
-aws-okta exec <profile_name> -- terraform apply -var="agent_type=node" -var="test_scenario=2" ./terraform/ 
+aws-okta exec <profile_name> -- terraform apply -var="baseline_agent_type=node" -var="test_scenario=2" ./terraform/ 
 ```
 
 ## Cleanup

@@ -48,14 +48,6 @@ else
       echo "Results will be saved to S3"
 fi
 
-if [ "$AGENT_TYPE" != "node" ]
-then
-  # Rust uses ingester on port 80 and node.js on 443
-  export INGESTER_PORT=80
-fi
-
-echo "Agent branch is ${AGENT_BRANCH}"
-
 nvm ls
 node --version
 rustc --version
@@ -66,18 +58,43 @@ ssh-keyscan github.com >> /home/ubuntu/.ssh/known_hosts
 # Generate keys for ingester
 openssl req -nodes -new -x509 -keyout self-signed-server.key -out self-signed-server.cert -subj "/C=US/ST=CA/L=SF/O=LOGDNA/OU=ENGINEERING/CN=www.logdna.com/emailAddress=info@logdna.com"
 
-# Rust agent repository was already downloaded
-cd logdna-agent-v2 || exit 1
-git checkout ${AGENT_BRANCH}
-cargo build --release
-
-cd ..
-
+# Clone agent-linux
 git clone -q git@github.com:logdna/agent-linux.git
-cd agent-linux || exit 1
-npm install
 
-cd ..
+# Rust agent repository was already cloned, update remote branches
+cd logdna-agent-v2 || exit
+git fetch --all
+cd
+
+install() {
+  local name=${1}
+  local agent_type=${2}
+  local branch=${3}
+  local cmd=""
+  echo "Installing $name, type: $agent_type, branch: $branch"
+
+  if [ "$agent_type" == "rust" ]
+  then
+    sudo cp -a logdna-agent-v2 "/data/${name}"
+    cmd="cargo build --release"
+  else
+    sudo cp -a agent-linux /data/baseline
+    cmd="npm install"
+  fi
+
+  ln -s "/data/${name}" "${name}"
+  cd "${name}" || exit 1
+  git checkout -b "${name}" "origin/${branch}"
+  eval "$cmd"
+  cd
+}
+
+install "baseline" "$BASELINE_AGENT_TYPE" "$BASELINE_AGENT_BRANCH"
+
+if [ "$COMPARE_AGENT_TYPE" != "" ]
+then
+  install "compare" "$COMPARE_AGENT_TYPE" "$COMPARE_AGENT_BRANCH"
+fi
 
 git clone -q git@github.com:logdna/agent-benchmarks.git
 cd agent-benchmarks/src/monitoring || exit 1

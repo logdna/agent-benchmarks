@@ -23,13 +23,23 @@ variable "purpose" {
   default = "Used for performance testing the agents"
 }
 
-variable "agent_branch" {
+variable "baseline_agent_type" {
+  default = "rust"
+  type = string
+}
+
+variable "baseline_agent_branch" {
   default = "master"
   type = string
 }
 
-variable "agent_type" {
-  default = "rust"
+variable "compare_agent_type" {
+  default = ""
+  type = string
+}
+
+variable "compare_agent_branch" {
+  default = "master"
   type = string
 }
 
