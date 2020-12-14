@@ -5,7 +5,7 @@ sudo mkdir /data
 sudo mount /dev/nvme1n1 /data
 
 sudo apt-get update -y -qq
-sudo apt install -y -qq build-essential pkg-config libssh-dev cmake libsystemd-dev
+sudo apt install -y -qq build-essential pkg-config libssh-dev cmake libsystemd-dev gnuplot
 
 # Install NVM
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.1/install.sh | bash

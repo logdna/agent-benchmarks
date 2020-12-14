@@ -28,10 +28,9 @@ export RESOLUTION_TIME_SERIES=10
 # TODO: Move this settings to a "profile" or a group of settings
 export LOG_LINES=200000
 export RUN_TIME_IN_SECONDS=120
-export MAX_CHUNK_SIZE_KB=64
+export MAX_CHUNK_SIZE_KB=16
 export DELAY_APPEND_MS=5
-export TOTAL_FILES=1
-export RUN_IN_THE_BACKGROUND=false
+export TOTAL_FILES=20
 
 if [ -z "$AWS_ACCESS_KEY_ID" ]
 then
@@ -101,11 +100,16 @@ cd agent-benchmarks/src/monitoring || exit 1
 npm install
 
 # Start the benchmark
-NODE_OPTIONS="--unhandled-rejections=strict"
+sudo -E "${NVM_BIN}/node" --unhandled-rejections=strict index.js
 
-if [ "$RUN_IN_THE_BACKGROUND" == "true" ]
+cd
+
+# Generate charts
+GNUPLOT_PARAMS="BASIC=1"
+
+if [ "$COMPARE_AGENT_TYPE" != "" ]
 then
-  nohup sudo -E "${NVM_BIN}/node" $NODE_OPTIONS index.js &
-else
-  sudo -E "${NVM_BIN}/node" $NODE_OPTIONS index.js
+  GNUPLOT_PARAMS="${GNUPLOT_PARAMS};INCLUDE_COMPARE=1"
 fi
+
+gnuplot -e $GNUPLOT_PARAMS agent-benchmarks/src/charts/memory-series.gnuplot
