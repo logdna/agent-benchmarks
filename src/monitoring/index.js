@@ -73,12 +73,11 @@ async function runScenarioAppend(name, agentType) {
 async function startAgent(name, agentType) {
   const launcher = agentType === agentTypes.rust ? rustLauncher : nodeLauncher;
 
-  await Promise.race([
+  const agentProcess = await Promise.race([
     launcher(name),
     delay(10000).then(() => { throw new Error('Process could not start before timeout'); })
   ]);
 
-  const agentProcess = await agentLaunchPromise;
   const monitor = new ProcessMonitor(agentProcess, name);
   await monitor.init();
 

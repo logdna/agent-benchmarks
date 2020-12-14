@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = {
+const self = module.exports = {
   scenarios: {
     /**
      * Test scenario that uses a single pre-generated large file and waits for all the data
@@ -19,12 +19,11 @@ module.exports = {
   },
   getSettings() {
     const delayAppendMs = parseInt(process.env['DELAY_APPEND_MS']);
-
     return {
       folderPath: process.env['DEFAULT_LOG_PATH'],
       testScenario: parseInt(process.env['TEST_SCENARIO']) || 2,
-      baselineAgent: this.agentType[process.env['BASELINE_AGENT_TYPE']] || this.agentType.node,
-      compareAgent: this.agentType[process.env['COMPARE_AGENT_TYPE']],
+      baselineAgent: self.agentTypes[process.env['BASELINE_AGENT_TYPE']] || self.agentTypes.node,
+      compareAgent: self.agentTypes[process.env['COMPARE_AGENT_TYPE']],
       totalFiles: parseInt(process.env['TOTAL_FILES']) || 1,
 
       // For scenarios that are completed by total run time

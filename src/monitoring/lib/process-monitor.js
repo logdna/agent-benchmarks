@@ -31,7 +31,9 @@ class ProcessMonitor extends EventEmitter {
   }
 
   async init() {
-    await fs.mkdir(this._getResultPath(), {recursive: true});
+    const resultPath = this._getResultPath();
+    await fs.rmdir(resultPath, {recursive: true});
+    await fs.mkdir(resultPath, {recursive: true});
   }
 
   async _recordStats() {
@@ -99,7 +101,8 @@ class ProcessMonitor extends EventEmitter {
   }
 
   _getResultPath(fileName) {
-    const basePath = path.join(process.env['RESULT_BASE_PATH'] || process.env['HOME'], 'results', this._resultKey);
+    const env = process.env;
+    const basePath = path.join(env['RESULT_BASE_PATH'] || env['HOME'], 'results', 'benchmarks', this._resultKey);
 
     if (!fileName) {
       return basePath;
