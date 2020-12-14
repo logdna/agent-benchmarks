@@ -25,12 +25,15 @@ async function run() {
   }
 
   await scenarioRunner('baseline', settings.baselineAgent);
-  await scenarioRunner('compare', settings.compareAgent);
+
+  if (settings.compareAgent) {
+    await scenarioRunner('compare', settings.compareAgent);
+  }
 }
 
 async function runScenarioLookback(name, agentType) {
   await generateFileStructure(settings, settings.fileLineLength);
-  const ingesterContext = await ingesterLauncher(settings.fileLineLength);
+  const ingesterContext = await ingesterLauncher(settings.fileLineLength, agentType);
   const monitor = await startAgent(name, agentType);
 
   // Rust requires the file to be changed to kick in
@@ -50,7 +53,7 @@ async function runScenarioLookback(name, agentType) {
 
 async function runScenarioAppend(name, agentType) {
   await generateFileStructure(settings, 0)
-  const ingesterContext = await ingesterLauncher(0);
+  const ingesterContext = await ingesterLauncher(0, agentType);
   const monitor = await startAgent(name, agentType);
 
   console.log('Starting to append to file periodically');

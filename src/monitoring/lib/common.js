@@ -24,9 +24,7 @@ module.exports = {
       folderPath: process.env['DEFAULT_LOG_PATH'],
       testScenario: parseInt(process.env['TEST_SCENARIO']) || 2,
       baselineAgent: this.agentType[process.env['BASELINE_AGENT_TYPE']] || this.agentType.node,
-      baselineBranch: process.env['BASELINE_BRANCH'] || 'master',
-      compareAgent: this.agentType[process.env['COMPARE_AGENT_TYPE']] || this.agentType.rust,
-      compareBranch: process.env['COMPARE_BRANCH'] || 'master',
+      compareAgent: this.agentType[process.env['COMPARE_AGENT_TYPE']],
       totalFiles: parseInt(process.env['TOTAL_FILES']) || 1,
 
       // For scenarios that are completed by total run time

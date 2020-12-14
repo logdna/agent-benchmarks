@@ -1,12 +1,14 @@
-const { fork } = require('child_process');
+const {fork} = require('child_process');
 const path = require('path');
+const {agentTypes} = require('./common')
 
-function launcher(expectedLines) {
+function launcher(expectedLines, agentType) {
   return new Promise((resolve, reject) => {
     const ingesterContext = {};
     ingesterContext.finishReceiving = new Promise(receivedResolver => {
-      const pathToFile = path.join(__dirname, 'ingester.js')
-      const env = Object.assign({EXPECTED_LINES: expectedLines}, process.env);
+      const pathToFile = path.join(__dirname, 'ingester.js');
+      const port = agentType === agentTypes.rust ? 80 : 443;
+      const env = Object.assign({EXPECTED_LINES: expectedLines, INGESTER_PORT: port}, process.env);
       const p = fork(pathToFile, [], { silent: true, env});
       ingesterContext.process = p;
       console.log(`Ingester process ${p.pid} started from "${pathToFile}"`);
