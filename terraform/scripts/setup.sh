@@ -12,7 +12,7 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 # Load environment variables that came from terraform variables
 export $(cat env_vars.txt)
 # Clean up the file
-rm env_vars.txt
+shred -zvu -n  5 env_vars.txt
 
 export LDLOGSSL=false
 export INGESTION_HOST=127.0.0.1
@@ -30,21 +30,6 @@ export RUN_TIME_IN_SECONDS=120
 export MAX_CHUNK_SIZE_KB=16
 export DELAY_APPEND_MS=5
 export TOTAL_FILES=20
-
-if [ -z "$AWS_ACCESS_KEY_ID" ]
-then
-      export SAVE_TO_S3=false
-      echo "Results will be sent to standard output"
-else
-      if [ -z "$AWS_SECRET_ACCESS_KEY" ]
-      then
-        echo "AWS secret access key can not be empty when access key is set"
-        exit 1
-      fi
-
-      export SAVE_TO_S3=true
-      echo "Results will be saved to S3"
-fi
 
 nvm ls
 node --version
@@ -114,3 +99,14 @@ fi
 
 echo "Plotting charts"
 sudo gnuplot -e $GNUPLOT_PARAMS agent-benchmarks/src/charts/memory-series.gnuplot
+
+# Save to S3
+if [ "$AWS_ACCESS_KEY_ID" != "" ]
+then
+  echo "Saving results to S3"
+  DEFAULT_BUCKET="agent-benchmarks-$(date +%s)"
+  BUCKET="${BUCKET:-$DEFAULT_BUCKET}"
+  aws s3 mb "s3://${BUCKET}"
+  aws s3 cp ~/results/charts/memory-series.png "s3://${BUCKET}"
+  aws s3 cp ~/results/benchmarks "s3://${BUCKET}/benchmarks" --recursive
+fi
