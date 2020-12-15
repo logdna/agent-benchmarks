@@ -8,13 +8,13 @@ variable "path_to_ssh_key" {
 }
 
 variable "aws_access_key" {
-  description = "An AWS IAM user is required to upload the results to S3.\nLeave empty in order to output the results in the console."
+  description = "An AWS IAM user is required to upload the results to S3."
   default = ""
   type = string
 }
 
 variable "aws_secret_key" {
-  description = "An AWS IAM user is required to upload the results to S3.\nLeave empty in order to output the results in the console."
+  description = "An AWS IAM user is required to upload the results to S3."
   default = ""
   type = string
 }

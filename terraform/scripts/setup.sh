@@ -26,7 +26,6 @@ export LOGDNA_LOOKBACK=start
 export RESOLUTION_TIME_SERIES=10
 
 # TODO: Move this settings to a "profile" or a group of settings
-export LOG_LINES=200000
 export RUN_TIME_IN_SECONDS=120
 export MAX_CHUNK_SIZE_KB=16
 export DELAY_APPEND_MS=5
@@ -77,8 +76,8 @@ install() {
     sudo cp -a logdna-agent-v2 "/data/${name}"
     cmd="cargo build --release"
   else
-    sudo cp -a agent-linux /data/baseline
-    cmd="npm install"
+    sudo cp -a agent-linux "/data/${name}"
+    cmd="npm install --no-progress "
   fi
 
   ln -s "/data/${name}" "${name}"
@@ -97,7 +96,7 @@ fi
 
 git clone -q git@github.com:logdna/agent-benchmarks.git
 cd agent-benchmarks/src/monitoring || exit 1
-npm install
+npm install --no-progress
 
 # Start the benchmark
 sudo -E "${NVM_BIN}/node" --unhandled-rejections=strict index.js
@@ -105,6 +104,7 @@ sudo -E "${NVM_BIN}/node" --unhandled-rejections=strict index.js
 cd
 
 # Generate charts
+sudo mkdir ~/results/charts/
 GNUPLOT_PARAMS="BASIC=1"
 
 if [ "$COMPARE_AGENT_TYPE" != "" ]
@@ -112,4 +112,5 @@ then
   GNUPLOT_PARAMS="${GNUPLOT_PARAMS};INCLUDE_COMPARE=1"
 fi
 
-gnuplot -e $GNUPLOT_PARAMS agent-benchmarks/src/charts/memory-series.gnuplot
+echo "Plotting charts"
+sudo gnuplot -e $GNUPLOT_PARAMS agent-benchmarks/src/charts/memory-series.gnuplot

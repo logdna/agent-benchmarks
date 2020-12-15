@@ -46,7 +46,7 @@ The terraform files include several [variables][tf-variables] that can be set, t
 of those variables. For example:
 
 ```bash
-aws-okta exec <profile_name> -- terraform apply -var="baseline_agent_type=node" -var="test_scenario=2" ./terraform/ 
+terraform apply -var="baseline_agent_type=node" -var="test_scenario=2" ./terraform/ 
 ```
 
 ## Cleanup
