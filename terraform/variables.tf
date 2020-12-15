@@ -43,8 +43,14 @@ variable "compare_agent_branch" {
   type = string
 }
 
+variable "bucket" {
+  description = "Name of the S3 bucket"
+  type = string
+  default = ""
+}
+
 variable "test_scenario" {
   description = "Test scenario 1 for lookback or Test scenario 2 for append"
-  default = 1
+  default = 2
   type = number
 }

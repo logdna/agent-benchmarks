@@ -103,9 +103,9 @@ sudo gnuplot -e $GNUPLOT_PARAMS agent-benchmarks/src/charts/memory-series.gnuplo
 # Save to S3
 if [ "$AWS_ACCESS_KEY_ID" != "" ]
 then
-  echo "Saving results to S3"
   DEFAULT_BUCKET="agent-benchmarks-$(date +%s)"
   BUCKET="${BUCKET:-$DEFAULT_BUCKET}"
+  echo "Saving results to s3://${BUCKET}"
   aws s3 mb "s3://${BUCKET}"
   aws s3 cp ~/results/charts/memory-series.png "s3://${BUCKET}"
   aws s3 cp ~/results/benchmarks "s3://${BUCKET}/benchmarks" --recursive
