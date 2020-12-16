@@ -43,8 +43,8 @@ variable "compare_agent_branch" {
   type = string
 }
 
-variable "bucket" {
-  description = "Name of the S3 bucket"
+variable "bucket_folder" {
+  description = "Name of the S3 bucket folder"
   type = string
   default = ""
 }

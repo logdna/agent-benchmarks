@@ -104,12 +104,14 @@ sudo gnuplot -e $GNUPLOT_PARAMS agent-benchmarks/src/charts/memory-series.gnuplo
 if [ "$AWS_ACCESS_KEY_ID" != "" ]
 then
   BUCKET="agent-benchmarks-results"
-  FOLDER=$(date +%s)
+  DEFAULT_FOLDER="sample-$(date +%s)"
+  FOLDER="${FOLDER:-$DEFAULT_FOLDER}"
+
   echo "Saving results to s3://${BUCKET}/${FOLDER}"
   if aws s3 ls "s3://${BUCKET}" 2>&1 | grep -q 'NoSuchBucket'
   then
     aws s3 mb "s3://${BUCKET}"
   fi
-  aws s3 cp ~/results/charts/memory-series.png "s3://${BUCKET}/${FOLDER}" --acl public-read
+  aws s3 cp ~/results/charts/memory-series.png "s3://${BUCKET}/${FOLDER}/memory-series.png" --acl public-read
   aws s3 cp ~/results/benchmarks "s3://${BUCKET}/${FOLDER}/benchmarks" --recursive --acl public-read
 fi
