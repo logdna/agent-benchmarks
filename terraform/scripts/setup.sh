@@ -105,13 +105,13 @@ if [ "$AWS_ACCESS_KEY_ID" != "" ]
 then
   BUCKET="agent-benchmarks-results"
   DEFAULT_FOLDER="sample-$(date +%s)"
-  FOLDER="${FOLDER:-$DEFAULT_FOLDER}"
+  BUCKET_FOLDER="${BUCKET_FOLDER:-$DEFAULT_FOLDER}"
 
-  echo "Saving results to s3://${BUCKET}/${FOLDER}"
+  echo "Saving results to s3://${BUCKET}/${BUCKET_FOLDER}"
   if aws s3 ls "s3://${BUCKET}" 2>&1 | grep -q 'NoSuchBucket'
   then
     aws s3 mb "s3://${BUCKET}"
   fi
-  aws s3 cp ~/results/charts/memory-series.png "s3://${BUCKET}/${FOLDER}/memory-series.png" --acl public-read
-  aws s3 cp ~/results/benchmarks "s3://${BUCKET}/${FOLDER}/benchmarks" --recursive --acl public-read
+  aws s3 cp ~/results/charts/memory-series.png "s3://${BUCKET}/${BUCKET_FOLDER}/memory-series.png" --acl public-read
+  aws s3 cp ~/results/benchmarks "s3://${BUCKET}/${BUCKET_FOLDER}/benchmarks" --recursive --acl public-read
 fi
