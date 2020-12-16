@@ -42,7 +42,7 @@ ssh-keyscan github.com >> /home/ubuntu/.ssh/known_hosts
 openssl req -nodes -new -x509 -keyout self-signed-server.key -out self-signed-server.cert -subj "/C=US/ST=CA/L=SF/O=LOGDNA/OU=ENGINEERING/CN=www.logdna.com/emailAddress=info@logdna.com"
 
 # Clone agent-linux
-git clone -q git@github.com:logdna/agent-linux.git
+git clone -q git@github.com:logdna/agent-linux.git || echo "agent-linux could not be cloned"
 
 # Rust agent repository was already cloned, update remote branches
 cd logdna-agent-v2 || exit
