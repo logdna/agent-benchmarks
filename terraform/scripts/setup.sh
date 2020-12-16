@@ -23,7 +23,7 @@ export LOGDNA_AGENT_KEY=123
 export LOGDNA_INGESTION_KEY=$LOGDNA_AGENT_KEY
 export LOGDNA_EXCLUSION_RULES="/var/log/**"
 export LOGDNA_LOOKBACK=start
-export RESOLUTION_TIME_SERIES=10
+export RESOLUTION_TIME_SERIES=5
 
 # TODO: Move this settings to a "profile" or a group of settings
 export RUN_TIME_IN_SECONDS=120
@@ -106,7 +106,7 @@ then
   BUCKET="agent-benchmarks-results"
   FOLDER=$(date +%s)
   echo "Saving results to s3://${BUCKET}/${FOLDER}"
-  if aws s3 ls "s3://$S3_BUCKET" 2>&1 | grep -q 'NoSuchBucket'
+  if aws s3 ls "s3://${BUCKET}" 2>&1 | grep -q 'NoSuchBucket'
   then
     aws s3 mb "s3://${BUCKET}"
   fi
