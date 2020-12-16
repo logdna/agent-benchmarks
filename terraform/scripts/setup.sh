@@ -79,7 +79,7 @@ then
   install "compare" "$COMPARE_AGENT_TYPE" "$COMPARE_AGENT_BRANCH"
 fi
 
-git clone -q git@github.com:logdna/agent-benchmarks.git
+git clone -q git@github.com:logdna/agent-benchmarks.git || git clone -q https://github.com/logdna/agent-benchmarks.git
 cd agent-benchmarks/src/monitoring || exit 1
 npm install --no-progress
 
