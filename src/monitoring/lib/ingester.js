@@ -34,6 +34,15 @@ async function start() {
     reply.code(200).send('OK: ingester running');
   });
 
+  fastify.get('/count', function (r, reply) {
+    reply.code(200).send(totalLines.toString());
+  });
+
+  fastify.delete('/count', function (r, reply) {
+    totalLines = 0;
+    reply.code(200).send('OK: deleted');
+  });
+
   fastify.post('/logs/agent', function (request, reply) {
     if (!receivedFirstRequest) {
       receivedFirstRequest = true;

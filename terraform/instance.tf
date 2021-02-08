@@ -56,6 +56,18 @@ resource aws_instance client_r1 {
       private_key = tls_private_key.dev.private_key_pem
     }
 
+    source      = "terraform/scripts/endurance.sh"
+    destination = "endurance.sh"
+  }
+
+  provisioner "file" {
+    connection {
+      type = "ssh"
+      host = self.public_ip
+      user = "ubuntu"
+      private_key = tls_private_key.dev.private_key_pem
+    }
+
     source      = var.path_to_ssh_key
     destination = "/home/ubuntu/.ssh/id_rsa"
   }

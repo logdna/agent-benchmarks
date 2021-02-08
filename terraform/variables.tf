@@ -50,7 +50,7 @@ variable "bucket_folder" {
 }
 
 variable "test_scenario" {
-  description = "Test scenario 1 for lookback or Test scenario 2 for append"
+  description = "Test scenario 1 for lookback, 2 for append or 3 for endurance testing"
   default = 2
   type = number
 }

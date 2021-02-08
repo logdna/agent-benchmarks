@@ -83,6 +83,18 @@ git clone -q git@github.com:logdna/agent-benchmarks.git || git clone -q https://
 cd agent-benchmarks/src/monitoring || exit 1
 npm install --no-progress
 
+if [ "$TEST_SCENARIO" == "3" ]
+then
+  #nohup start endurance.sh
+  cd
+  export INGESTER_PORT=80
+  EXPORT EXPECTED_LINES=0
+  nohup sudo -E "${NVM_BIN}/node" agent-benchmarks/src/monitoring/lib/ingester.js &> nohup_ingester.out &
+  #logdna-agent-v2/target/release/logdna-agent
+  sudo bash ./endurance.sh
+  exit 0
+fi
+
 # Start the benchmark
 sudo -E "${NVM_BIN}/node" --unhandled-rejections=strict index.js
 

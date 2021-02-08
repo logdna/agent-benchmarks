@@ -1,14 +1,17 @@
 #!/bin/bash
 
-# TODO: Move out of log dir w/ symlinks
-#	- create a dir with a file outside of log dir
-#	- create a symlink to the log dir
-#	- move dir log file to a trash location
+count_every=30
+truncate_every=90
+truncate_dir="/var/log/testing/truncating"
+move_create_every=60
+move_create_dir="/var/log/testing/movecreate"
+symlinks_every=60
+symlinks_dangling_every=30
+symlinks_source_dir="/tmp/symlinks-source"
+symlinks_target_dir="/var/log/testing/symlinks"
 
-truncate_every=20
-truncate_folder="/var/log/testing/truncating"
-move_create_every=20
-move_create_folder="/var/log/testing/movecreate"
+current_symlinks_source_dir="$symlinks_source_dir/0_normal"
+current_symlinks_dangling_source_dir="$symlinks_source_dir/0_dangling"
 
 to_append="Nov 30 09:14:47 sample-host-name sampleprocess[1204]: Hello from sample process\n"
 recycle_bin="/tmp/testing-recycle-bin"
@@ -22,10 +25,9 @@ clean_recycle_bin () {
 truncate_workload () {
   local i=$1
   local n=$(($i%truncate_every))
-  local file="$truncate_folder/truncating.log"
-  echo "i: $i; n: $n;"
+  local file="$truncate_dir/truncating.log"
   if [ $n -eq 0 ]; then
-    echo "truncating file"
+    echo "-- Truncating step $i"
     : > $file
   fi
   printf "$to_append" >> $file
@@ -35,29 +37,94 @@ truncate_workload () {
 move_create_workload () {
   local i=$1
   local n=$(($i%move_create_every))
-  local file="$move_create_folder/movecreate.log"
-
+  local file="$move_create_dir/movecreate.log"
 
   if [ $n -eq 0 ]; then
-    echo "----move-creating folder $i"
+    echo "-- Move / create step $i"
+    # Wait for changes to be consumed
+    sleep 1
     clean_recycle_bin
-    mv -f $move_create_folder $recycle_bin
+    mv -f $move_create_dir $recycle_bin
 
-    mkdir $move_create_folder
+    mkdir $move_create_dir
     : > $file
   fi
 
   printf "$to_append" >> $file
 }
 
-mkdir -p $truncate_folder
-mkdir -p $move_create_folder
-clean_recycle_bin
+symlink_file_workload () {
+  local i=$1
+  local n=$(($i%symlinks_every))
+  local symlink_file="$symlinks_target_dir/symlinkfile_normal.log"
 
-# ~72h
-for ((i=0; i<2592000; i++))
-do
-  sleep 0.1
-  truncate_workload $i
-  move_create_workload $i
-done
+  if [ $n -eq 0 ]; then
+    echo "-- Symlink $i"
+    rm -f $symlink_file
+    rm -Rf $current_symlinks_source_dir
+    current_symlinks_source_dir="$symlinks_source_dir/${i}_normal"
+    mkdir -p $current_symlinks_source_dir
+    local source_file="$current_symlinks_source_dir/source.log"
+    : > $source_file
+    echo "ln -s $source_file $symlink_file"
+    ln -s $source_file $symlink_file
+  fi
+
+  local source_file="$current_symlinks_source_dir/source.log"
+  printf "$to_append" >> $source_file
+}
+
+symlink_dangling_file_workload () {
+  local i=$1
+  local n=$(($i%symlinks_dangling_every))
+  local symlink_file="$symlinks_target_dir/symlinkfile_dangling.log"
+
+  if [ $n -eq 0 ]; then
+    echo "-- Dangling symlink $i"
+    rm -Rf $current_symlinks_dangling_source_dir
+    current_symlinks_dangling_source_dir="$symlinks_source_dir/${i}_dangling"
+    mkdir -p $current_symlinks_dangling_source_dir
+    local source_file="$current_symlinks_dangling_source_dir/source.log"
+
+    # Remove the dangling symlink
+    rm -f $symlink_file
+    : > $source_file
+    echo "ln -s $source_file $symlink_file"
+    ln -s $source_file $symlink_file
+  fi
+
+  local source_file="$current_symlinks_dangling_source_dir/source.log"
+  printf "$to_append" >> $source_file
+}
+
+start () {
+  mkdir -p $truncate_dir
+  mkdir -p $move_create_dir
+  mkdir -p $symlinks_source_dir
+  mkdir -p $symlinks_target_dir
+
+  clean_recycle_bin
+
+  curl -sS -X DELETE "http://127.0.0.1/count"
+
+  # ~72h
+  for ((i=0; i<2592000; i++))
+  do
+    sleep 0.1
+
+#    truncate_workload $i
+    move_create_workload $i
+#    symlink_file_workload $i
+#    symlink_dangling_file_workload $i
+
+    n=$(($i%count_every))
+    if [ $n -eq 0 ]; then
+      sleep 1
+      sent=$(( 1*i ))
+      received=$(curl -sS "http://127.0.0.1/count")
+      echo "Sent: $sent; received: $received"
+    fi
+  done
+}
+
+start
