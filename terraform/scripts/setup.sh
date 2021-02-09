@@ -92,15 +92,17 @@ then
   export INGESTER_PORT=80
   export INGESTER_FILTER_PATH=/var/log/testing/
   export EXPECTED_LINES=0
+  export LOGDNA_EXCLUSION_RULES=""
 
-  # Start the ingester
-  nohup sudo -E "${NVM_BIN}/node" agent-benchmarks/src/monitoring/lib/ingester.js &> nohup_ingester.out &
+  echo "Starting ingester..."
+  nohup sh -c "sudo -E ${NVM_BIN}/node agent-benchmarks/src/monitoring/lib/ingester.js" > nohup_ingester.out &
 
+  echo "Starting the agent..."
   # Start the agent (using baseline symlink)
-  nohup baseline/target/release/logdna-agent &> nohup_agent.out &
+  nohup sh -c "baseline/target/release/logdna-agent" > nohup_agent.out &
 
-  # Start the endurance tests
-  nohup sudo bash ./endurance.sh &> nohup_endurance.out &
+  echo "Starting endurance script..."
+  nohup sudo bash ./endurance.sh > nohup_endurance.out &
 
   echo "Finished launched endurance tests, tail nohup files to view status"
   exit 0

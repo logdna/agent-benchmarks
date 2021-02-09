@@ -49,6 +49,16 @@ of those variables. For example:
 terraform apply -var="baseline_agent_type=node" -var="test_scenario=2" ./terraform/ 
 ```
 
+### Examples
+
+#### Endurance test launch
+
+Launch the endurance tests using branch `3.0` of the Rust Agent.
+
+```bash
+terraform apply -var="test_scenario=3" -var="baseline_agent_branch=3.0" ./terraform/
+```
+
 ## Cleanup
 
 You can cleanup all terraform managed resources with:
