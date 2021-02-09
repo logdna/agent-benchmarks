@@ -97,12 +97,18 @@ then
   echo "Starting ingester..."
   nohup sh -c "sudo -E ${NVM_BIN}/node agent-benchmarks/src/monitoring/lib/ingester.js" > nohup_ingester.out &
 
+  ls
+
   echo "Starting the agent..."
   # Start the agent (using baseline symlink)
   nohup sh -c "baseline/target/release/logdna-agent" > nohup_agent.out &
 
+  ls
+
   echo "Starting endurance script..."
   nohup sudo bash ./endurance.sh > nohup_endurance.out &
+
+  ls
 
   echo "Finished launched endurance tests, tail nohup files to view status"
   exit 0
