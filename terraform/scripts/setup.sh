@@ -85,13 +85,24 @@ npm install --no-progress
 
 if [ "$TEST_SCENARIO" == "3" ]
 then
-  #nohup start endurance.sh
+  echo "Launching endurance tests..."
+
   cd
+
   export INGESTER_PORT=80
-  EXPORT EXPECTED_LINES=0
+  export INGESTER_FILTER_PATH=/var/log/testing/
+  export EXPECTED_LINES=0
+
+  # Start the ingester
   nohup sudo -E "${NVM_BIN}/node" agent-benchmarks/src/monitoring/lib/ingester.js &> nohup_ingester.out &
-  #logdna-agent-v2/target/release/logdna-agent
-  sudo bash ./endurance.sh
+
+  # Start the agent (using baseline symlink)
+  nohup baseline/target/release/logdna-agent &> nohup_agent.out &
+
+  # Start the endurance tests
+  nohup sudo bash ./endurance.sh &> nohup_endurance.out &
+
+  echo "Finished launched endurance tests, tail nohup files to view status"
   exit 0
 fi
 

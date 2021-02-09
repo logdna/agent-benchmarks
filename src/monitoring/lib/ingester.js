@@ -4,6 +4,7 @@ const fastifyStart = require('fastify');
 const port = parseInt(process.env['INGESTER_PORT']) || 443;
 const listenAddress = '127.0.0.1';
 const logProcessed = process.env['LOG_PROCESSED'] === 'true';
+const filterPath = process.env['INGESTER_FILTER_PATH'];
 
 async function start() {
   const expectedLines = parseInt(process.env['EXPECTED_LINES'], 10);
@@ -50,7 +51,17 @@ async function start() {
     }
 
     const lines = request.body.ls || request.body.lines;
-    totalLines += lines.length;
+
+    if (!filterPath) {
+      totalLines += lines.length;
+    } else {
+      for (const line of lines) {
+        if (line.file.startsWith(filterPath)) {
+          totalLines++;
+        }
+      }
+    }
+
     if (expectedLines > 0 && totalLines >= expectedLines) {
       if (!hasFinished) {
         hasFinished = true;

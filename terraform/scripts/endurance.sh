@@ -3,10 +3,10 @@
 count_every=30
 truncate_every=90
 truncate_dir="/var/log/testing/truncating"
-move_create_every=60
+move_create_every=100
 move_create_dir="/var/log/testing/movecreate"
-symlinks_every=60
-symlinks_dangling_every=30
+symlinks_every=180
+symlinks_dangling_every=120
 symlinks_source_dir="/tmp/symlinks-source"
 symlinks_target_dir="/var/log/testing/symlinks"
 
@@ -27,6 +27,8 @@ truncate_workload () {
   local n=$(($i%truncate_every))
   local file="$truncate_dir/truncating.log"
   if [ $n -eq 0 ]; then
+    # Wait for changes to be consumed
+    sleep 1
     echo "-- Truncating step $i"
     : > $file
   fi
@@ -60,13 +62,14 @@ symlink_file_workload () {
 
   if [ $n -eq 0 ]; then
     echo "-- Symlink $i"
+    # Wait for changes to be consumed
+    sleep 1
     rm -f $symlink_file
     rm -Rf $current_symlinks_source_dir
     current_symlinks_source_dir="$symlinks_source_dir/${i}_normal"
     mkdir -p $current_symlinks_source_dir
     local source_file="$current_symlinks_source_dir/source.log"
     : > $source_file
-    echo "ln -s $source_file $symlink_file"
     ln -s $source_file $symlink_file
   fi
 
@@ -81,6 +84,8 @@ symlink_dangling_file_workload () {
 
   if [ $n -eq 0 ]; then
     echo "-- Dangling symlink $i"
+    # Wait for changes to be consumed
+    sleep 1
     rm -Rf $current_symlinks_dangling_source_dir
     current_symlinks_dangling_source_dir="$symlinks_source_dir/${i}_dangling"
     mkdir -p $current_symlinks_dangling_source_dir
@@ -89,7 +94,6 @@ symlink_dangling_file_workload () {
     # Remove the dangling symlink
     rm -f $symlink_file
     : > $source_file
-    echo "ln -s $source_file $symlink_file"
     ln -s $source_file $symlink_file
   fi
 
@@ -112,15 +116,15 @@ start () {
   do
     sleep 0.1
 
-#    truncate_workload $i
+    truncate_workload $i
     move_create_workload $i
-#    symlink_file_workload $i
-#    symlink_dangling_file_workload $i
+    symlink_file_workload $i
+    symlink_dangling_file_workload $i
 
     n=$(($i%count_every))
     if [ $n -eq 0 ]; then
       sleep 1
-      sent=$(( 1*i ))
+      sent=$(( 4*i ))
       received=$(curl -sS "http://127.0.0.1/count")
       echo "Sent: $sent; received: $received"
     fi
