@@ -41,12 +41,14 @@ ssh-keyscan github.com >> /home/ubuntu/.ssh/known_hosts
 # Generate keys for ingester
 openssl req -nodes -new -x509 -keyout self-signed-server.key -out self-signed-server.cert -subj "/C=US/ST=CA/L=SF/O=LOGDNA/OU=ENGINEERING/CN=www.logdna.com/emailAddress=info@logdna.com"
 
+sudo chmod 0777 /data
+cd /data || exit 1
+
 # Clone agent-linux
 git clone -q git@github.com:logdna/agent-linux.git || echo "agent-linux could not be cloned"
 
-# Rust agent repository was already cloned, update remote branches
-cd logdna-agent-v2 || exit
-git fetch --all
+git clone https://github.com/logdna/logdna-agent-v2.git
+cd logdna-agent-v2 || exit 1
 cd
 
 install() {
@@ -58,10 +60,10 @@ install() {
 
   if [ "$agent_type" == "rust" ]
   then
-    sudo cp -a logdna-agent-v2 "/data/${name}"
+    sudo cp -a /data/logdna-agent-v2 "/data/${name}"
     cmd="cargo build --release"
   else
-    sudo cp -a agent-linux "/data/${name}"
+    sudo cp -a /data/agent-linux "/data/${name}"
     cmd="npm install --no-progress "
   fi
 
@@ -118,7 +120,7 @@ then
 fi
 
 # Start the benchmark
-sudo -E "${NVM_BIN}/node" --unhandled-rejections=strict index.js
+sudo -E "${NVM_BIN}/node" --unhandled-rejections=strict agent-benchmarks/src/monitoring/index.js
 
 cd
 

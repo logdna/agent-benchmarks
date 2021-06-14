@@ -18,6 +18,10 @@ async function start() {
     console.log('Ingester will run without notifying an end');
   }
 
+  if (filterPath) {
+    console.log(`Using filter path: ${filterPath}`);
+  }
+
   let receivedFirstRequest = false;
   let hasFinished = false;
   let totalLines = 0;

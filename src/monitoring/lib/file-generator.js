@@ -11,6 +11,8 @@ const delay = util.promisify(setTimeout);
 const line = Buffer.from('Nov 30 09:14:47 sample-host-name sampleprocess[1204]: Hello from sample process\n');
 const fileOptions = {encoding: 'utf8', mode: 0o777};
 
+let lineCounter = 0;
+
 async function generateFileStructure(settings, initialFileLineLength) {
   const {folderPath,totalFiles} = settings;
   await fs.promises.rmdir(folderPath, {recursive: true});
@@ -92,6 +94,7 @@ function createChunk(maxChunkSize, lines = Number.MAX_SAFE_INTEGER) {
   let byteLength = 0;
   const buffers = [];
   while (lineLength <= lines && byteLength < maxChunkSize) {
+    const line = Buffer.from('Nov 30 09:14:47 sample-host-name sampleprocess[1]: Hello from sample process ' + (lineCounter++) + '\n');
     buffers.push(line);
     lineLength++;
     byteLength += line.length;

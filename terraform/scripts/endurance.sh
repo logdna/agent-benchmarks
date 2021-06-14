@@ -13,7 +13,7 @@ symlinks_target_dir="/var/log/testing/symlinks"
 current_symlinks_source_dir="$symlinks_source_dir/0_normal"
 current_symlinks_dangling_source_dir="$symlinks_source_dir/0_dangling"
 
-to_append="Nov 30 09:14:47 sample-host-name sampleprocess[1204]: Hello from sample process\n"
+to_append="Nov 30 09:14:47 sample-host-name: Hello from %s %s\n"
 recycle_bin="/tmp/testing-recycle-bin"
 
 clean_recycle_bin () {
@@ -32,7 +32,7 @@ truncate_workload () {
     echo "-- Truncating step $i"
     : > $file
   fi
-  printf "$to_append" >> $file
+  printf "$to_append" "truncate" "$i" >> $file
 }
 
 # Move the existing file out of the log dir and recreate log file
@@ -52,7 +52,7 @@ move_create_workload () {
     : > $file
   fi
 
-  printf "$to_append" >> $file
+  printf "$to_append" "move-create" "$i" >> $file
 }
 
 symlink_file_workload () {
@@ -74,7 +74,7 @@ symlink_file_workload () {
   fi
 
   local source_file="$current_symlinks_source_dir/source.log"
-  printf "$to_append" >> $source_file
+  printf "$to_append" "symlink" "$i" >> $source_file
 }
 
 symlink_dangling_file_workload () {
@@ -98,7 +98,7 @@ symlink_dangling_file_workload () {
   fi
 
   local source_file="$current_symlinks_dangling_source_dir/source.log"
-  printf "$to_append" >> $source_file
+  printf "$to_append" "sym-dangling" "$i" >> $source_file
 }
 
 start () {
