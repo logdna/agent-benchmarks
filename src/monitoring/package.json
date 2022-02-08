@@ -11,7 +11,7 @@
   "dependencies": {
     "fastify": "^3.25.3",
     "fastify-compress": "^3.7.0",
-    "hdr-histogram-js": "^2.0.1",
+    "hdr-histogram-js": "^2.0.3",
     "pidusage": "^2.0.21"
   }
 }
