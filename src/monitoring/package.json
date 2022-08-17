@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fastify": "^3.25.3",
+    "fastify": "^3.26.0",
     "fastify-compress": "^3.7.0",
     "hdr-histogram-js": "^2.0.3",
     "pidusage": "^2.0.21"
